@@ -9,13 +9,6 @@ const searchQuery = ref('')
 const selectedRole = ref('All')
 const isModalOpen = ref(false)
 
-const newUser = ref({
-  name: '',
-  email: '',
-  role: 'Staff',
-  status: 'Active'
-})
-
 const users = ref([
   { id: 1, name: 'Clara Angelica', email: 'clara@admin.uwn.id', role: 'Administrator', status: 'Active', joined: '12 Jan 2025' },
   { id: 2, name: 'Dimas Aditya', email: 'dimas.adit@admin.uwn.id', role: 'Editor', status: 'Active', joined: '03 Feb 2025' },
@@ -33,19 +26,16 @@ const filteredUsers = computed(() => {
   })
 })
 
-const addUser = () => {
-  if (newUser.value.name && newUser.value.email) {
-    users.value.push({
-      id: users.value.length + 1,
-      name: newUser.value.name,
-      email: newUser.value.email,
-      role: newUser.value.role,
-      status: newUser.value.status,
-      joined: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
-    })
-    newUser.value = { name: '', email: '', role: 'Staff', status: 'Active' }
-    isModalOpen.value = false
-  }
+const addUser = (data) => {
+  users.value.push({
+    id: users.value.length + 1,
+    name: data.name,
+    email: data.email,
+    role: data.role,
+    status: data.status,
+    joined: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+  })
+  isModalOpen.value = false
 }
 
 const deleteUser = (id) => {
@@ -106,113 +96,10 @@ const deleteUser = (id) => {
       </div>
     </div>
 
-    <!-- Users Table using custom UiCard and UiTable -->
-    <UiCard no-padding>
-      <UiTable
-        :headers="['Nama Lengkap', 'Email', 'Peranan', 'Status', 'Bergabung Pada', 'Aksi']"
-        :items="filteredUsers"
-      >
-        <template #default="{ item }">
-          <td class="px-6 py-4 font-semibold text-zinc-900 dark:text-white">{{ item.name }}</td>
-          <td class="px-6 py-4 font-mono text-xs text-zinc-650 dark:text-zinc-400">{{ item.email }}</td>
-          <td class="px-6 py-4">
-            <span
-              :class="[
-                'px-2.5 py-0.5 rounded-full text-xs font-semibold',
-                item.role === 'Administrator' && 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400',
-                item.role === 'Editor' && 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400',
-                item.role === 'Staff' && 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
-                item.role === 'Viewer' && 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
-              ]"
-            >
-              {{ item.role }}
-            </span>
-          </td>
-          <td class="px-6 py-4">
-            <span
-              :class="[
-                'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium',
-                item.status === 'Active' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
-              ]"
-            >
-              <span :class="['w-1.5 h-1.5 rounded-full', item.status === 'Active' ? 'bg-emerald-500' : 'bg-zinc-400']"></span>
-              {{ item.status }}
-            </span>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-xs text-zinc-500">{{ item.joined }}</td>
-          <td class="px-6 py-4 text-right space-x-3 whitespace-nowrap">
-            <button class="text-xs font-semibold text-indigo-650 hover:text-indigo-700 dark:text-indigo-400 hover:underline">
-              Edit
-            </button>
-            <button
-              class="text-xs font-semibold text-rose-650 hover:text-rose-700 dark:text-rose-450 hover:underline"
-              @click="deleteUser(item.id)"
-            >
-              Hapus
-            </button>
-          </td>
-        </template>
-      </UiTable>
-    </UiCard>
+    <!-- Users Table -->
+    <AdminUserUserTable :users="filteredUsers" @delete="deleteUser" />
 
-    <!-- Create User Modal Dialog using custom UiModal -->
-    <UiModal :is-open="isModalOpen" title="Tambah Pengguna Baru" @close="isModalOpen = false">
-      <form @submit.prevent="addUser" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-zinc-550 dark:text-zinc-450 mb-1">Nama Lengkap</label>
-          <input
-            v-model="newUser.name"
-            type="text"
-            required
-            placeholder="Masukkan nama..."
-            class="w-full px-3 py-2 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:text-white"
-          />
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-zinc-550 dark:text-zinc-450 mb-1">Alamat Email</label>
-          <input
-            v-model="newUser.email"
-            type="email"
-            required
-            placeholder="contoh@admin.uwn.id"
-            class="w-full px-3 py-2 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:text-white"
-          />
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-zinc-550 dark:text-zinc-450 mb-1">Peranan (Role)</label>
-          <select
-            v-model="newUser.role"
-            class="w-full px-3 py-2 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:outline-none dark:text-white"
-          >
-            <option>Staff</option>
-            <option>Editor</option>
-            <option>Viewer</option>
-            <option>Administrator</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-zinc-550 dark:text-zinc-450 mb-1">Status Keaktifan</label>
-          <select
-            v-model="newUser.status"
-            class="w-full px-3 py-2 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:outline-none dark:text-white"
-          >
-            <option value="Active">Aktif</option>
-            <option value="Inactive">Nonaktif</option>
-          </select>
-        </div>
-
-        <div class="flex gap-3 justify-end pt-4 border-t border-zinc-100 dark:border-zinc-800">
-          <UiButton variant="outline" @click="isModalOpen = false">
-            Batal
-          </UiButton>
-          <UiButton type="submit" variant="primary">
-            Simpan Pengguna
-          </UiButton>
-        </div>
-      </form>
-    </UiModal>
+    <!-- Create User Modal -->
+    <AdminUserUserFormModal :is-open="isModalOpen" @submit="addUser" @close="isModalOpen = false" />
   </div>
 </template>
