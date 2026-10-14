@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps({
   isOpen: {
@@ -10,13 +10,49 @@ const props = defineProps({
 
 const emit = defineEmits(['toggleSidebar'])
 
-const menuItems = [
-  { name: 'Dashboard', path: '/', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
-  { name: 'User Management', path: '/admin/users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
-  { name: 'Settings', path: '/admin/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' }
-]
-
+const { user, isStaff, isAdmin } = useAuth()
 const route = useRoute()
+
+const menuItems = computed(() => {
+  if (isStaff.value) {
+    return [
+      {
+        name: 'Dashboard',
+        path: '/admin',
+        icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z'
+      },
+      {
+        name: 'Antrean Tiket',
+        path: '/admin/tickets',
+        icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'
+      },
+      {
+        name: 'Dataset AI Feedback',
+        path: '/admin/ai-feedback',
+        icon: 'M13 10V3L4 14h7v7l9-11h-7z'
+      },
+      {
+        name: 'Master Kategori',
+        path: '/admin/categories',
+        icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
+      }
+    ]
+  }
+
+  // End-User / Pelapor Navigation
+  return [
+    {
+      name: 'Buat Laporan Tiket',
+      path: '/tickets/create',
+      icon: 'M12 4v16m8-8H4'
+    },
+    {
+      name: 'Tiket Saya',
+      path: '/my-tickets',
+      icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'
+    }
+  ]
+})
 </script>
 
 <template>
@@ -40,12 +76,11 @@ const route = useRoute()
         <NuxtLink to="/" class="flex items-center gap-3 font-semibold text-zinc-900 dark:text-white">
           <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-200 dark:shadow-none">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
           <span :class="['font-bold tracking-tight text-lg transition-opacity duration-200', !isOpen && 'lg:opacity-0 lg:pointer-events-none']">
-            AdminPortal
+            IT Helpdesk
           </span>
         </NuxtLink>
         
@@ -73,7 +108,6 @@ const route = useRoute()
               : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-white'
           ]"
         >
-          <!-- SVG Icon -->
           <svg
             :class="[
               'w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110',
@@ -86,8 +120,7 @@ const route = useRoute()
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
           </svg>
 
-          <!-- Label text -->
-          <span :class="['transition-opacity duration-200 whitespace-nowrap', !isOpen && 'lg:opacity-0 lg:pointer-events-none']">
+          <span :class="['transition-opacity duration-200 whitespace-nowrap text-sm', !isOpen && 'lg:opacity-0 lg:pointer-events-none']">
             {{ item.name }}
           </span>
 
@@ -102,16 +135,14 @@ const route = useRoute()
       </nav>
 
       <!-- Footer Info -->
-      <div class="p-4 border-t border-zinc-200 dark:border-zinc-800">
+      <div v-if="user" class="p-4 border-t border-zinc-200 dark:border-zinc-800">
         <div class="flex items-center gap-3">
-          <img
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"
-            alt="Avatar"
-            class="w-9 h-9 rounded-full object-cover border border-zinc-200 dark:border-zinc-700"
-          />
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 text-white font-bold text-xs flex items-center justify-center uppercase shrink-0">
+            {{ user.name?.charAt(0) || 'U' }}
+          </div>
           <div :class="['flex-1 overflow-hidden transition-opacity duration-200', !isOpen && 'lg:opacity-0 lg:pointer-events-none']">
-            <h4 class="text-sm font-semibold text-zinc-900 dark:text-white truncate">Clara Angelica</h4>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400 truncate">Administrator</p>
+            <h4 class="text-xs font-semibold text-zinc-900 dark:text-white truncate">{{ user.name }}</h4>
+            <p class="text-[10px] text-zinc-500 dark:text-zinc-400 truncate capitalize">{{ user.role }} • {{ user.department || 'UWN' }}</p>
           </div>
         </div>
       </div>

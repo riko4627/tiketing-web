@@ -10,6 +10,8 @@ const props = defineProps({
 
 const emit = defineEmits(['toggleSidebar'])
 
+const { user, isAuthenticated, logout } = useAuth()
+
 const isDark = ref(false)
 const showProfileDropdown = ref(false)
 const showNotifications = ref(false)
@@ -26,7 +28,6 @@ const toggleDarkMode = () => {
 }
 
 onMounted(() => {
-  // Check local storage or system preference
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     isDark.value = true
@@ -60,7 +61,7 @@ onMounted(() => {
         </span>
         <input
           type="text"
-          placeholder="Cari data, laporan, info..."
+          placeholder="Cari nomor tiket, subjek, lokasi..."
           class="w-full pl-9 pr-4 py-2 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:text-white transition-all"
         />
       </div>
@@ -82,93 +83,67 @@ onMounted(() => {
         </svg>
       </button>
 
-      <!-- Notifications -->
-      <div class="relative">
-        <button
-          class="p-2.5 rounded-xl text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/80 transition-all relative"
-          @click="showNotifications = !showNotifications; showProfileDropdown = false"
-        >
-          <span class="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white dark:ring-zinc-900"></span>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
-        </button>
-
-        <!-- Dropdown Notifications Menu -->
-        <div
-          v-if="showNotifications"
-          class="absolute right-0 mt-2 w-80 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-xl z-50 overflow-hidden"
-        >
-          <div class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700 font-semibold text-sm text-zinc-900 dark:text-white">
-            Notifikasi Terbaru
-          </div>
-          <div class="divide-y divide-zinc-100 dark:divide-zinc-700 max-h-64 overflow-y-auto">
-            <a href="#" class="flex px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition">
-              <div class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mr-3">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold text-zinc-850 dark:text-zinc-250 truncate">Laporan triwulan diupdate</p>
-                <p class="text-[10px] text-zinc-400 mt-0.5">2 menit yang lalu</p>
-              </div>
-            </a>
-            <a href="#" class="flex px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition">
-              <div class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mr-3">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold text-zinc-850 dark:text-zinc-250 truncate">User baru mendaftar</p>
-                <p class="text-[10px] text-zinc-400 mt-0.5">1 jam yang lalu</p>
-              </div>
-            </a>
-          </div>
-        </div>
-      </div>
-
       <!-- Divider -->
       <span class="w-px h-6 bg-zinc-200 dark:bg-zinc-800"></span>
 
       <!-- User Menu -->
-      <div class="relative">
+      <div v-if="isAuthenticated && user" class="relative">
         <button
-          class="flex items-center gap-2.5 focus:outline-none"
+          class="flex items-center gap-2.5 focus:outline-none p-1 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           @click="showProfileDropdown = !showProfileDropdown; showNotifications = false"
         >
-          <img
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"
-            alt="Avatar"
-            class="w-9 h-9 rounded-xl object-cover border border-zinc-200 dark:border-zinc-700"
-          />
-          <span class="hidden md:block text-sm font-semibold text-zinc-750 dark:text-zinc-200">Clara</span>
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 text-white font-bold text-xs flex items-center justify-center uppercase shadow-sm">
+            {{ user.name?.charAt(0) || 'U' }}
+          </div>
+          <div class="hidden md:flex flex-col text-left">
+            <span class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 leading-tight">
+              {{ user.name }}
+            </span>
+            <span class="text-[10px] text-zinc-400 font-medium capitalize">
+              {{ user.role === 'admin' ? 'Supervisor IT' : user.role === 'agent' ? 'Teknisi IT' : 'Pelapor' }}
+            </span>
+          </div>
+          <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
         </button>
 
         <!-- Dropdown Menu -->
         <div
           v-if="showProfileDropdown"
-          class="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-xl z-50 overflow-hidden"
+          class="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl z-50 overflow-hidden"
         >
-          <div class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">
-            <p class="text-xs text-zinc-400">Masuk sebagai</p>
-            <p class="text-sm font-semibold text-zinc-900 dark:text-white truncate">clara@admin.uwn.id</p>
+          <div class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+            <p class="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">Login Sebagai</p>
+            <p class="text-xs font-semibold text-zinc-900 dark:text-white truncate mt-0.5">{{ user.email }}</p>
+            <div class="mt-1.5">
+              <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-400">
+                {{ user.role }}
+              </span>
+            </div>
           </div>
-          <div class="py-1">
-            <NuxtLink to="/admin/settings" class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700" @click="showProfileDropdown = false">
-              Profil Saya
-            </NuxtLink>
-            <NuxtLink to="/admin/settings" class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700" @click="showProfileDropdown = false">
-              Pengaturan
-            </NuxtLink>
-          </div>
-          <div class="py-1 border-t border-zinc-200 dark:border-zinc-700">
-            <a href="#" class="block px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20">
-              Keluar
-            </a>
+          <div class="p-1.5 border-t border-zinc-100 dark:border-zinc-800">
+            <button
+              @click="logout(); showProfileDropdown = false"
+              class="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-colors text-left"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span>Keluar dari Akun</span>
+            </button>
           </div>
         </div>
+      </div>
+
+      <!-- If not logged in -->
+      <div v-else>
+        <NuxtLink
+          to="/login"
+          class="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition-colors"
+        >
+          Masuk
+        </NuxtLink>
       </div>
     </div>
   </header>
